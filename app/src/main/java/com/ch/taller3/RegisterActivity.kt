@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat
 import com.ch.taller3.modelos.Usuario
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegistroBinding
@@ -28,10 +30,13 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     //Firebase
     private lateinit var dbRef: DatabaseReference
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //Inicializamos Firebase Reference
         dbRef = FirebaseDatabase.getInstance().getReference("usuarios")
+        //Inicializamos Firebase Auth
+        auth = Firebase.auth
 
         //Inicializamos FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -74,35 +79,48 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     //Funciones de Firebase
-    private fun registrarUsuario(){
-        val userId = dbRef.push().key
-        val name = binding.name.text.toString()
-        val lastName = binding.lastName.text.toString()
+    private fun registrarUsuario() {
         val email = binding.email.text.toString()
         val password = binding.password.text.toString()
-        val identificationNumber = binding.identificationNumber.text.toString()
-        var latitud = 0.0
-        var longitud = 0.0
 
-        // Obtener la ubicación del usuario
-        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location: Location? ->
-            if (location != null) {
-                latitud = location.latitude
-                longitud = location.longitude
-            } else {
-                Toast.makeText(this, "Error al obtener la ubicación", Toast.LENGTH_SHORT).show()
-            }
-        }
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    //Registro exitoso
+                    val user = auth.currentUser
+                    if (user != null) {
+                        val userId = user.uid // Obtenemos el UID del usuario
 
-        //Creamos el objeto usuario
-        val usuario = Usuario(name, lastName, email, password, identificationNumber, latitud, longitud)
+                        // Obtener la ubicación del usuario
+                        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location: Location? ->
+                            if (location != null) {
+                                val latitud = location.latitude
+                                val longitud = location.longitude
 
-        //Guardamos el usuario en la base de datos
-        dbRef.child(userId!!).setValue(usuario)
-            .addOnCompleteListener{
-                Toast.makeText(this, "Registrado", Toast.LENGTH_SHORT).show()
+                                // Creamos el objeto usuario
+                                val name = binding.name.text.toString()
+                                val lastName = binding.lastName.text.toString()
+                                val identificationNumber = binding.identificationNumber.text.toString()
+                                val usuario = Usuario(name, lastName, identificationNumber, latitud, longitud)
+
+                                // Guardamos los datos en Firebase Realtime Database asociados al correo y contraseña
+                                // Reemplazamos los puntos con guiones bajos en el correo para usarlo como clave primaria
+                                dbRef.child(email.replace(".", "_")).setValue(usuario)
+                                    .addOnCompleteListener {
+                                        Toast.makeText(this, "Registrado", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(this, "Error al obtener la ubicación", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } else {
+                    // Error en el registro, muestra un mensaje de error
+                    Toast.makeText(this, "Error en el registro: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
+
 
     //Funciones de ubicacion
     private fun solicitarPermisoUbicacion() {
