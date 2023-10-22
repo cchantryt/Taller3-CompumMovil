@@ -5,19 +5,29 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.ch.taller3.databinding.ActivityMainBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    //Firebase
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Inicializamos Firebase
+        auth = Firebase.auth
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.loginButton.setOnClickListener(){
             if (validarCampos()) {
-                Toast.makeText(this, "Inicio sesion", Toast.LENGTH_SHORT).show()
+                iniciarSesion()
             }else{
-                Toast.makeText(this, "Campos vacios", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Llene todos los campos", Toast.LENGTH_SHORT).show()
             }
         }
         binding.registerButton.setOnClickListener(){
@@ -35,5 +45,21 @@ class MainActivity : AppCompatActivity() {
             return false
         }
         return true
+    }
+
+    //Funciones de Firebase
+    private fun iniciarSesion(){
+        auth.signInWithEmailAndPassword(
+            binding.email.text.toString(),
+            binding.password.text.toString()
+        ).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                // Inicio de sesión exitoso
+                Toast.makeText(this, "Sesion iniciada", Toast.LENGTH_SHORT).show()
+            } else {
+                // Inicio de sesión fallido
+                Toast.makeText(this, "Datos incorrectos", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }  
