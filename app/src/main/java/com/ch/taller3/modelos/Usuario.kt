@@ -6,4 +6,5 @@ data class Usuario (
     val numeroIdentificacion: String = "",
     val latitud: Double = 0.0,
     val longitud: Double = 0.0,
+    val estado: Boolean = false
     )

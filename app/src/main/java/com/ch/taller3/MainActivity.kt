@@ -1,65 +1,70 @@
 package com.ch.taller3
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.ch.taller3.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    //Firebase
-    private lateinit var auth: FirebaseAuth
+    // Firebase
+    private lateinit var databaseReference: DatabaseReference
+    private lateinit var mAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //Inicializamos Firebase Auth
-        auth = Firebase.auth
-
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.loginButton.setOnClickListener(){
-            if (validarCampos()) {
-                iniciarSesion()
-            }else{
-                Toast.makeText(this, "Llene todos los campos", Toast.LENGTH_SHORT).show()
+        // Inicializamos Firebase Reference
+        mAuth = FirebaseAuth.getInstance()
+        // Obtenemos la referencia del usuario actual
+        val user = mAuth.currentUser
+        val email = user?.email
+
+        if (email != null) {
+            val userId = email.replace(".", "_")
+            databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios").child(userId)
+        }
+
+        binding.logOutButton.setOnClickListener {
+            // Cerramos sesión
+            mAuth.signOut()
+
+            // Pasamos a la actividad de inicio de sesión
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
+        binding.userButton.setOnClickListener {
+            startActivity(Intent(this, UserActivity::class.java))
+        }
+
+        // Switch
+        // Obtener el estado actual del usuario desde Firebase Realtime Database y actualizar el Switch
+        databaseReference.child("activo").get().addOnSuccessListener { dataSnapshot ->
+            val isActive = dataSnapshot.value as? Boolean
+            if (isActive != null) {
+                binding.status.isChecked = isActive
             }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Error al obtener el estado del usuario", Toast.LENGTH_SHORT).show()
         }
-        binding.registerButton.setOnClickListener(){
-            startActivity(Intent(this, RegisterActivity::class.java))
-        }
-    }
 
-    private fun validarCampos(): Boolean {
-        if (binding.email.text.toString().isEmpty()) {
-            Toast.makeText(this, "Error en email", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.password.text.toString().isEmpty() || binding.password.text.toString().length < 6) {
-            Toast.makeText(this, "Error en contraseña", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        return true
-    }
-
-    //Funciones de Firebase
-    private fun iniciarSesion(){
-        auth.signInWithEmailAndPassword(
-            binding.email.text.toString(),
-            binding.password.text.toString()
-        ).addOnCompleteListener(this) { task ->
-            if (task.isSuccessful) {
-                // Inicio de sesión exitoso
-                Toast.makeText(this, "Sesion iniciada", Toast.LENGTH_SHORT).show()
+        binding.status.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                Toast.makeText(this, "Activo", Toast.LENGTH_SHORT).show()
             } else {
-                // Inicio de sesión fallido
-                Toast.makeText(this, "Datos incorrectos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Inactivo", Toast.LENGTH_SHORT).show()
             }
+
+            // Guardar el estado del Switch en Firebase Realtime Database
+            databaseReference.child("estado").setValue(isChecked)
         }
     }
-}  
+}

@@ -1,6 +1,7 @@
 package com.ch.taller3
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -8,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.ch.taller3.databinding.ActivityRegistroBinding
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 import android.location.Location
@@ -51,6 +51,10 @@ class RegisterActivity : AppCompatActivity() {
             }else{
                 Toast.makeText(this, "Llene todos los campos", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        binding.loginButton.setOnClickListener(){
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
@@ -101,13 +105,14 @@ class RegisterActivity : AppCompatActivity() {
                                 val name = binding.name.text.toString()
                                 val lastName = binding.lastName.text.toString()
                                 val identificationNumber = binding.identificationNumber.text.toString()
-                                val usuario = Usuario(name, lastName, identificationNumber, latitud, longitud)
+                                val usuario = Usuario(name, lastName, identificationNumber, latitud, longitud, false)
 
                                 // Guardamos los datos en Firebase Realtime Database asociados al correo y contraseña
                                 // Reemplazamos los puntos con guiones bajos en el correo para usarlo como clave primaria
                                 dbRef.child(email.replace(".", "_")).setValue(usuario)
                                     .addOnCompleteListener {
                                         Toast.makeText(this, "Registrado", Toast.LENGTH_SHORT).show()
+                                        finish()
                                     }
                             } else {
                                 Toast.makeText(this, "Error al obtener la ubicación", Toast.LENGTH_SHORT).show()
