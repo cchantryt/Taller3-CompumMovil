@@ -16,6 +16,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var mAuth: FirebaseAuth
 
+    private var userId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -27,9 +29,10 @@ class MainActivity : AppCompatActivity() {
         val user = mAuth.currentUser
         val email = user?.email
 
-        if (email != null) {
-            val userId = email.replace(".", "_")
-            databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios").child(userId)
+
+        if (user != null) {
+            userId = user.uid // Obtén el UID del usuario
+            databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios").child(userId!!)
         }
 
         binding.logOutButton.setOnClickListener {
