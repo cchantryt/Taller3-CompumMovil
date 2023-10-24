@@ -90,10 +90,10 @@ class RegisterActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    //Registro exitoso
+                    // Registro exitoso
                     val user = auth.currentUser
                     if (user != null) {
-                        val userId = user.uid // Obtenemos el UID del usuario
+                        val userId = user.uid // Obtenemos el UID del usuario generado por Firebase
 
                         // Obtener la ubicación del usuario
                         fusedLocationClient.lastLocation.addOnSuccessListener(this) { location: Location? ->
@@ -107,9 +107,8 @@ class RegisterActivity : AppCompatActivity() {
                                 val identificationNumber = binding.identificationNumber.text.toString()
                                 val usuario = Usuario(name, lastName, identificationNumber, latitud, longitud, false)
 
-                                // Guardamos los datos en Firebase Realtime Database asociados al correo y contraseña
-                                // Reemplazamos los puntos con guiones bajos en el correo para usarlo como clave primaria
-                                dbRef.child(email.replace(".", "_")).setValue(usuario)
+                                // Guardamos los datos en Firebase Realtime Database con el UID como clave primaria
+                                dbRef.child(userId).setValue(usuario)
                                     .addOnCompleteListener {
                                         Toast.makeText(this, "Registrado", Toast.LENGTH_SHORT).show()
                                         finish()
@@ -163,4 +162,9 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    /*
+    * Pendientes:
+    * Error al registrar usuario
+    * cambiar el modo de guardado del usuario
+    * */
 }
