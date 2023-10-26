@@ -14,7 +14,7 @@ import com.google.firebase.ktx.Firebase
 import android.location.Location
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.ch.taller3.modelos.Usuario
+import com.ch.taller3.models.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
@@ -58,29 +58,6 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun validarCampos(): Boolean {
-        if (binding.name.text.toString().isEmpty()) {
-            Toast.makeText(this, "Error en nombre", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.lastName.text.toString().isEmpty()) {
-            Toast.makeText(this, "Error en apellido", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.email.text.toString().isEmpty()) {
-            Toast.makeText(this, "Error en email", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.password.text.toString().isEmpty() || binding.password.text.toString().length < 6) {
-            Toast.makeText(this, "Error en contraseña", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (binding.identificationNumber.text.toString().isEmpty()) {
-            Toast.makeText(this, "Error en identificacion", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        return true
-    }
 
     //Funciones de Firebase
     private fun registrarUsuario() {
@@ -105,7 +82,7 @@ class RegisterActivity : AppCompatActivity() {
                                 val name = binding.name.text.toString()
                                 val lastName = binding.lastName.text.toString()
                                 val identificationNumber = binding.identificationNumber.text.toString()
-                                val usuario = Usuario(name, lastName, identificationNumber, latitud, longitud, false)
+                                val usuario = User(name, lastName, identificationNumber, latitud, longitud, false)
 
                                 // Guardamos los datos en Firebase Realtime Database con el UID como clave primaria
                                 dbRef.child(userId).setValue(usuario)
@@ -160,6 +137,31 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(this, "Se requieren permisos de ubicación para continuar", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    //Extras
+    private fun validarCampos(): Boolean {
+        if (binding.name.text.toString().isEmpty()) {
+            Toast.makeText(this, "Error en nombre", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (binding.lastName.text.toString().isEmpty()) {
+            Toast.makeText(this, "Error en apellido", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (binding.email.text.toString().isEmpty()) {
+            Toast.makeText(this, "Error en email", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (binding.password.text.toString().isEmpty() || binding.password.text.toString().length < 6) {
+            Toast.makeText(this, "Error en contraseña", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (binding.identificationNumber.text.toString().isEmpty()) {
+            Toast.makeText(this, "Error en identificacion", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 
     /*

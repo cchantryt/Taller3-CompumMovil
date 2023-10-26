@@ -10,7 +10,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.ch.taller3.modelos.Usuario
+import com.ch.taller3.models.User
 
 class UserActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUsuarioBinding
@@ -37,7 +37,7 @@ class UserActivity : AppCompatActivity() {
 
         binding.saveButton.setOnClickListener {
             // Actualizar datos en Firebase
-            val usuario = Usuario(
+            val usuario = User(
                 nombre = binding.name.text.toString(),
                 apellido = binding.lastName.text.toString(),
                 numeroIdentificacion = binding.identificationNumber.text.toString(),
@@ -65,7 +65,7 @@ class UserActivity : AppCompatActivity() {
         if (userId != null) {
             databaseReference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val usuario = dataSnapshot.getValue(Usuario::class.java)
+                    val usuario = dataSnapshot.getValue(User::class.java)
 
                     if (usuario != null) {
                         // Mostrar los datos del usuario en los campos de texto
@@ -76,7 +76,6 @@ class UserActivity : AppCompatActivity() {
                         binding.longitud.setText(usuario.longitud.toString())
                     }
                 }
-
                 override fun onCancelled(databaseError: DatabaseError) {
                     Toast.makeText(this@UserActivity, "Error al cargar datos del usuario", Toast.LENGTH_SHORT).show()
                 }
@@ -86,8 +85,7 @@ class UserActivity : AppCompatActivity() {
 
     /*
     * Pendientes:
-    * actualizar email
-    * actualizar contraseña
-    *
+    * modificar email
+    * modificar contraseña
     * */
 }

@@ -1,6 +1,6 @@
-package com.ch.taller3.modelos
+package com.ch.taller3.models
 
-data class Usuario (
+data class User (
     val nombre: String = "",
     val apellido: String = "",
     val numeroIdentificacion: String = "",
