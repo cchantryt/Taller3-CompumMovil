@@ -13,11 +13,12 @@ import com.google.firebase.database.*
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    // Firebase
+    //Firebase
     private lateinit var databaseReference: DatabaseReference
     private lateinit var mAuth: FirebaseAuth
     private var userId: String? = null
 
+    //Lista de usuarios activos
     private var usuariosActivos = mutableListOf<String>()
     private lateinit var arrayAdapter: ArrayAdapter<String>
 
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializamos Firebase Reference
+        //Inicializamos Firebase Reference
         mAuth = FirebaseAuth.getInstance()
         val user = mAuth.currentUser
 
@@ -35,14 +36,22 @@ class MainActivity : AppCompatActivity() {
             databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios")
         }
 
-        // Inicializa el adaptador de la lista de usuarios activos
+        //Inicializa el adaptador de la lista de usuarios activos
         arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, usuariosActivos)
         binding.listaUsuariosActivos.adapter = arrayAdapter
 
-        // Agregar usuarios activos
+        //Agregamos a la lista los usuarios activos
         agregarUsuariosActivos()
 
-        // Obtener y mostrar el estado actual del usuario desde Firebase Realtime Database y actualizar el Switch
+        //Click en elemento de la lista
+        binding.listaUsuariosActivos.setOnItemClickListener { parent, view, position, id ->
+            val nombreUsuario = usuariosActivos[position]
+            Toast.makeText(this, "Clic en usuario: $nombreUsuario", Toast.LENGTH_SHORT).show()
+            //Empezamos actividad de mapa
+            startActivity(Intent(this, MapActivity::class.java))
+        }
+
+        //Obtener y mostrar el estado actual del usuario desde Firebase Realtime Database y actualizar el Switch
         databaseReference.child(userId ?: "").child("estado").get().addOnSuccessListener { dataSnapshot ->
             val isActive = dataSnapshot.value as? Boolean
             if (isActive != null) {
@@ -64,10 +73,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.logOutButton.setOnClickListener {
-            // Cerramos sesión
             mAuth.signOut()
-
-            // Pasamos a la actividad de inicio de sesión
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
@@ -77,11 +83,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Función que agrega los nombres de usuarios activos a la lista
+    // Función que agrega los nombres de usuarios activos a la lista de usuarios activos
     private fun agregarUsuariosActivos() {
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                usuariosActivos.clear() // Borra la lista antes de cargarla nuevamente
+                usuariosActivos.clear()
 
                 for (userSnapshot in dataSnapshot.children) {
                     val usuario = userSnapshot.getValue(User::class.java)
@@ -89,8 +95,6 @@ class MainActivity : AppCompatActivity() {
                         usuariosActivos.add(usuario.nombre)
                     }
                 }
-
-                // Notifica al adaptador que los datos han cambiado
                 arrayAdapter.notifyDataSetChanged()
             }
 

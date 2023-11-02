@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Taller3</string>
+    <string name="app_name">Taller 3</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCXuDJdQJh0TsWY83pS1ZvGT1i9nXkSitA</string>
 </resources>
