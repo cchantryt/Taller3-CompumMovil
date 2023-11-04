@@ -84,7 +84,7 @@ class RegisterActivity : AppCompatActivity() {
                                 val identificationNumber = binding.identificationNumber.text.toString()
                                 val usuario = User(name, lastName, identificationNumber, latitud, longitud, false)
 
-                                // Guardamos los datos en Firebase Realtime Database con el UID como clave primaria
+                                // Guardamos los datos en Firebase
                                 dbRef.child(userId).setValue(usuario)
                                     .addOnCompleteListener {
                                         Toast.makeText(this, "Registrado", Toast.LENGTH_SHORT).show()
@@ -163,10 +163,4 @@ class RegisterActivity : AppCompatActivity() {
         }
         return true
     }
-
-    /*
-    * Pendientes:
-    * Error al registrar usuario
-    * cambiar el modo de guardado del usuario
-    * */
 }

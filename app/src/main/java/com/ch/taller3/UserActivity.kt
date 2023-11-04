@@ -28,7 +28,7 @@ class UserActivity : AppCompatActivity() {
         val user = mAuth.currentUser
 
         if (user != null) {
-            userId = user.uid // Obtén el UID del usuario
+            userId = user.uid //UID del usuario autenticado
             databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios").child(userId!!)
         }
 
@@ -36,7 +36,6 @@ class UserActivity : AppCompatActivity() {
         cargarDatosUsuario()
 
         binding.saveButton.setOnClickListener {
-            // Actualizar datos en Firebase
             val usuario = User(
                 nombre = binding.name.text.toString(),
                 apellido = binding.lastName.text.toString(),
@@ -45,7 +44,7 @@ class UserActivity : AppCompatActivity() {
                 longitud = binding.longitud.text.toString().toDouble()
             )
 
-            // Guardar los nuevos datos en Firebase
+            //Nuevo valor en la base de datos
             databaseReference.setValue(usuario).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Datos actualizados", Toast.LENGTH_SHORT).show()
@@ -55,7 +54,7 @@ class UserActivity : AppCompatActivity() {
             }
         }
 
-        // Mostrar el email en el campo de texto correspondiente
+        // Cargar el email del usuario autenticado
         if (user != null) {
             binding.email.setText(user.email)
         }

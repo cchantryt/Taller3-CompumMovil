@@ -30,12 +30,9 @@ class LoginActivity : AppCompatActivity() {
 
         binding.loginButton.setOnClickListener(){
             if (validarCampos()) {
-                // Verificar y solicitar permisos de ubicación
                 if (verificarPermisosDeUbicacion()) {
-                    // Si los permisos ya están otorgados, inicia sesión
                     iniciarSesion()
                 } else {
-                    // Si los permisos no están otorgados, solicita permisos
                     solicitarPermisosDeUbicacion()
                 }
             } else {
@@ -65,10 +62,8 @@ class LoginActivity : AppCompatActivity() {
             binding.password.text.toString()
         ).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                // Inicio de sesión exitoso
                 startActivity(Intent(this, MainActivity::class.java))
             } else {
-                // Inicio de sesión fallido
                 Toast.makeText(this, "Datos incorrectos", Toast.LENGTH_SHORT).show()
             }
         }
@@ -84,22 +79,14 @@ class LoginActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
     }
 
-    // Luego, puedes manejar la respuesta de la solicitud de permisos en el método onRequestPermissionsResult:
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso de ubicación otorgado, ahora puedes iniciar sesión
                 iniciarSesion()
             } else {
                 Toast.makeText(this, "Los permisos de ubicación son necesarios para iniciar sesión.", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
-    /*
-    * TODO
-    *  Agregar solicitud de permisos de ubicación
-    */
 }  

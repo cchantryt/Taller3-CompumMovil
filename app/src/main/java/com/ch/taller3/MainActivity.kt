@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializamos Firebase Reference
+        // Inicializamos Firebase
         mAuth = FirebaseAuth.getInstance()
         val user = mAuth.currentUser
 
@@ -39,11 +39,10 @@ class MainActivity : AppCompatActivity() {
             databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios")
         }
 
-        // Inicializa el adaptador de la lista de usuarios activos
+        //Inicializamos el arrayAdapter
         arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, usuariosActivos)
         binding.listaUsuariosActivos.adapter = arrayAdapter
 
-        // Agregamos a la lista los usuarios activos
         agregarUsuariosActivos()
 
         //Click en elemento de la lista
@@ -60,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //Obtener y mostrar el estado actual del usuario desde Firebase Realtime Database y actualizar el Switch
+        //Estado del usuario, modificamo switch
         databaseReference.child(userId ?: "").child("estado").get().addOnSuccessListener { dataSnapshot ->
             val isActive = dataSnapshot.value as? Boolean
             if (isActive != null) {
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Inactivo", Toast.LENGTH_SHORT).show()
             }
 
-            // Guardar el estado del Switch en Firebase Realtime Database
+            //Guardamos el estado del usuario en Firebase
             databaseReference.child(userId ?: "").child("estado").setValue(isChecked)
         }
 
@@ -92,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Función que agrega los nombres de usuarios activos a la lista de usuarios activos
+    //Obtener los usuarios activos
     private fun agregarUsuariosActivos() {
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
