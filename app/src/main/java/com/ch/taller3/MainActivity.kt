@@ -13,21 +13,24 @@ import com.google.firebase.database.*
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    //Firebase
+    // Firebase
     private lateinit var databaseReference: DatabaseReference
     private lateinit var mAuth: FirebaseAuth
     private var userId: String? = null
 
-    //Lista de usuarios activos
+    // Lista de usuarios activos (nombres de usuarios)
     private var usuariosActivos = mutableListOf<String>()
     private lateinit var arrayAdapter: ArrayAdapter<String>
+
+    // Mapa de usuarios con detalles (nombre -> User)
+    private val usuariosDetallados = mutableMapOf<String, User>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //Inicializamos Firebase Reference
+        // Inicializamos Firebase Reference
         mAuth = FirebaseAuth.getInstance()
         val user = mAuth.currentUser
 
@@ -36,19 +39,25 @@ class MainActivity : AppCompatActivity() {
             databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios")
         }
 
-        //Inicializa el adaptador de la lista de usuarios activos
+        // Inicializa el adaptador de la lista de usuarios activos
         arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, usuariosActivos)
         binding.listaUsuariosActivos.adapter = arrayAdapter
 
-        //Agregamos a la lista los usuarios activos
+        // Agregamos a la lista los usuarios activos
         agregarUsuariosActivos()
 
         //Click en elemento de la lista
         binding.listaUsuariosActivos.setOnItemClickListener { parent, view, position, id ->
             val nombreUsuario = usuariosActivos[position]
-            Toast.makeText(this, "Clic en usuario: $nombreUsuario", Toast.LENGTH_SHORT).show()
-            //Empezamos actividad de mapa
-            startActivity(Intent(this, MapActivity::class.java))
+            val usuarioSeleccionado = usuariosDetallados[nombreUsuario]
+
+            if (usuarioSeleccionado != null) {
+                val intent = Intent(this, MapActivity::class.java)
+                intent.putExtra("nombreUsuario", usuarioSeleccionado.nombre)
+                intent.putExtra("latitudUsuario", usuarioSeleccionado.latitud)
+                intent.putExtra("longitudUsuario", usuarioSeleccionado.longitud)
+                startActivity(intent)
+            }
         }
 
         //Obtener y mostrar el estado actual del usuario desde Firebase Realtime Database y actualizar el Switch
@@ -88,11 +97,13 @@ class MainActivity : AppCompatActivity() {
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 usuariosActivos.clear()
+                usuariosDetallados.clear()
 
                 for (userSnapshot in dataSnapshot.children) {
                     val usuario = userSnapshot.getValue(User::class.java)
                     if (usuario != null && usuario.estado) {
                         usuariosActivos.add(usuario.nombre)
+                        usuariosDetallados[usuario.nombre] = usuario
                     }
                 }
                 arrayAdapter.notifyDataSetChanged()
@@ -103,9 +114,4 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
-    /*
-    * TODO
-    *  Hacer los elementos de la lista clickeables y que muestren la ubicación del usuario
-    * */
 }

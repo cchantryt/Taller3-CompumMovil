@@ -1,67 +1,93 @@
 package com.ch.taller3
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import com.ch.taller3.databinding.ActivityMainBinding
 import com.ch.taller3.databinding.FragmentMapBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapFragment
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.ch.taller3.models.User
 
-class MapActivity: AppCompatActivity(), OnMapReadyCallback {
+
+class MapActivity: AppCompatActivity() {
     private lateinit var map: GoogleMap
-    //Ubicacion usuario
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var binding: FragmentMapBinding
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var databaseReference: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = FragmentMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtener el fragmento del mapa
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mAuth = FirebaseAuth.getInstance()
+        val user = mAuth.currentUser
 
-        //Localizar al usuario
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    }
+        if (user != null) {
+            val userId = user.uid
+            databaseReference = FirebaseDatabase.getInstance().reference.child("usuarios").child(userId)
+        }
 
-    //TODO Separar mapa en varios fragmentos
+        // Obtenemos la latitud y longitud del usuario autenticado
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val usuarioAutenticado = dataSnapshot.getValue(User::class.java)
+                if (usuarioAutenticado != null) {
+                    // Inicializamos el mapa
+                    val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+                    mapFragment.getMapAsync { googleMap ->
+                        map = googleMap
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
+                        // Habilitar el botón de ubicación del usuario
+                        map.isMyLocationEnabled = true
 
-        //Punto que ubica al usuario
-        map.isMyLocationEnabled = true
+                        // Habilitar los controles de zoom
+                        map.uiSettings.isZoomControlsEnabled = true
 
-        //Controles de zoom
-        map.uiSettings.isZoomControlsEnabled = true
+                        // Marcador verde para la posición del usuario autenticado
+                        val ubicacionUsuarioAutenticado = LatLng(usuarioAutenticado.latitud, usuarioAutenticado.longitud)
+                        val marcadorUsuarioAutenticado = MarkerOptions()
+                            .position(ubicacionUsuarioAutenticado)
+                            .title("Mi Ubicación")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 
-        //Localizar al usuario
-        //Verificamos permisos
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        map.addMarker(marcadorUsuarioAutenticado)
+                        map.moveCamera(CameraUpdateFactory.newLatLng(ubicacionUsuarioAutenticado))
 
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    location?.let {
-                        val userLocation = LatLng(it.latitude, it.longitude)
-                        map.addMarker(MarkerOptions().position(userLocation).title("Mi Ubicación"))
-                        map.moveCamera(CameraUpdateFactory.newLatLng(userLocation))
-                        map.animateCamera(CameraUpdateFactory.zoomTo(15f))
+                        // Cuando un usuario hace clic en otro usuario, deberías recibir los datos de ese usuario y
+                        // agregar un marcador azul para la posición del usuario disponible
+
+                        // Obtén los datos del usuario seleccionado de la intención
+                        val nombreUsuario = intent.getStringExtra("nombreUsuario")
+                        val latitudUsuario = intent.getDoubleExtra("latitudUsuario", 0.0)
+                        val longitudUsuario = intent.getDoubleExtra("longitudUsuario", 0.0)
+
+                        // Añade un marcador en el mapa para el usuario seleccionado
+                        val ubicacionUsuario = LatLng(latitudUsuario, longitudUsuario)
+                        val marcadorUsuario = MarkerOptions()
+                            .position(ubicacionUsuario)
+                            .title("Usuario: $nombreUsuario")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+
+                        map.addMarker(marcadorUsuario)
+                        map.moveCamera(CameraUpdateFactory.newLatLng(ubicacionUsuario))
                     }
                 }
-        }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Toast.makeText(this@MapActivity, "Error al cargar datos del usuario", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

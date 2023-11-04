@@ -1,13 +1,18 @@
 package com.ch.taller3
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.ch.taller3.databinding.ActivityInicioSesionBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import android.Manifest
+
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityInicioSesionBinding
@@ -25,8 +30,15 @@ class LoginActivity : AppCompatActivity() {
 
         binding.loginButton.setOnClickListener(){
             if (validarCampos()) {
-                iniciarSesion()
-            }else{
+                // Verificar y solicitar permisos de ubicación
+                if (verificarPermisosDeUbicacion()) {
+                    // Si los permisos ya están otorgados, inicia sesión
+                    iniciarSesion()
+                } else {
+                    // Si los permisos no están otorgados, solicita permisos
+                    solicitarPermisosDeUbicacion()
+                }
+            } else {
                 Toast.makeText(this, "Llene todos los campos", Toast.LENGTH_SHORT).show()
             }
         }
@@ -61,4 +73,33 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun verificarPermisosDeUbicacion(): Boolean {
+        val fineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val coarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        return fineLocationPermission && coarseLocationPermission
+    }
+
+    private fun solicitarPermisosDeUbicacion() {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
+    }
+
+    // Luego, puedes manejar la respuesta de la solicitud de permisos en el método onRequestPermissionsResult:
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso de ubicación otorgado, ahora puedes iniciar sesión
+                iniciarSesion()
+            } else {
+                Toast.makeText(this, "Los permisos de ubicación son necesarios para iniciar sesión.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    /*
+    * TODO
+    *  Agregar solicitud de permisos de ubicación
+    */
 }  
