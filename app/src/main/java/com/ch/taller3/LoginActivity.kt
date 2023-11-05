@@ -43,7 +43,9 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
+    /***************************************************FUNCIONES*********************************************************/
 
+    /*EXTRAS*/
     private fun validarCampos(): Boolean {
         if (binding.email.text.toString().isEmpty()) {
             Toast.makeText(this, "Error en email", Toast.LENGTH_SHORT).show()
@@ -56,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
         return true
     }
 
+    //Firebase Auth
     private fun iniciarSesion(){
         auth.signInWithEmailAndPassword(
             binding.email.text.toString(),
@@ -69,6 +72,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    //Permisos de ubicacion
     private fun verificarPermisosDeUbicacion(): Boolean {
         val fineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val coarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED

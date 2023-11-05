@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /***************************************************FUNCIONES*********************************************************/
     //Obtener los usuarios activos
     private fun agregarUsuariosActivos() {
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {

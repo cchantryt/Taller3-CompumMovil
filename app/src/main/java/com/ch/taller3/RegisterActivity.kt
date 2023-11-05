@@ -58,8 +58,8 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-
-    //Funciones de Firebase
+    /***************************************************FUNCIONES*********************************************************/
+    //Firebase
     private fun registrarUsuario() {
         val email = binding.email.text.toString()
         val password = binding.password.text.toString()
@@ -102,8 +102,8 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
-
-    //Funciones de ubicacion
+    /*FUNCIONES DE UBICACION*/
+    //Solicitar permisos de ubicacion
     private fun solicitarPermisoUbicacion() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
@@ -139,7 +139,8 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    //Extras
+    /*EXTRAS*/
+    //Validar campos
     private fun validarCampos(): Boolean {
         if (binding.name.text.toString().isEmpty()) {
             Toast.makeText(this, "Error en nombre", Toast.LENGTH_SHORT).show()

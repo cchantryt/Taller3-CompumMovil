@@ -60,6 +60,7 @@ class UserActivity : AppCompatActivity() {
         }
     }
 
+    /***************************************************FUNCIONES*********************************************************/
     private fun cargarDatosUsuario() {
         if (userId != null) {
             databaseReference.addValueEventListener(object : ValueEventListener {
@@ -82,6 +83,7 @@ class UserActivity : AppCompatActivity() {
         }
     }
 
+    /***************************************************PENDIENTES*********************************************************/
     /*
     * TODO
     * Modificar email
