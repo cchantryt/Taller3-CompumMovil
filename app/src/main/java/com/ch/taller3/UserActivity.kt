@@ -83,8 +83,8 @@ class UserActivity : AppCompatActivity() {
     }
 
     /*
-    * Pendientes:
-    * modificar email
-    * modificar contraseña
+    * TODO
+    * Modificar email
+    * Modificar contraseña
     * */
 }

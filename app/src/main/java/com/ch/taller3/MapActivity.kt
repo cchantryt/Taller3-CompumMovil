@@ -145,4 +145,9 @@ class MapActivity : AppCompatActivity() {
             map.moveCamera(CameraUpdateFactory.newLatLng(ubicacionUsuario))
         }
     }
+
+    /*
+    * TODO
+    *  La ubicacion del usuario disponible solo se actualiza cuando se vuelve a iniciar sesion
+    * */
 }

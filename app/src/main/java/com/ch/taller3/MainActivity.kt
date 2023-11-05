@@ -78,6 +78,8 @@ class MainActivity : AppCompatActivity() {
 
             //Guardamos el estado del usuario en Firebase
             databaseReference.child(userId ?: "").child("estado").setValue(isChecked)
+
+            agregarUsuariosActivos()
         }
 
         binding.logOutButton.setOnClickListener {
@@ -113,4 +115,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+    /*
+    * TODO
+    *  Quitar al usuario autenticado de la lista de usuarios activos
+    * */
 }
