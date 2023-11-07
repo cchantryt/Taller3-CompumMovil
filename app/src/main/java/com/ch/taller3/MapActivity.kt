@@ -76,6 +76,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationRequest.interval = 10000
 
+        //Nuevos valores en la base de datos del usuario autenticado
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
@@ -93,12 +94,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             .title("Mi Ubicación")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     )
-
-                    map.moveCamera(CameraUpdateFactory.newLatLng(newLocation))
                 }
             }
         }, null)
 
+        // Ubicacion del usuario autenticado
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val usuarioAutenticado = dataSnapshot.getValue(User::class.java)
@@ -111,8 +111,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             .title("Mi Ubicación")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     )
-
-                    map.moveCamera(CameraUpdateFactory.newLatLng(ubicacionUsuarioAutenticado))
                 }
             }
 
@@ -121,6 +119,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
 
+        // Ubicacion del usuario seleccionado
         val nombreUsuario = intent.getStringExtra("nombreUsuario")
         val latitudUsuario = intent.getDoubleExtra("latitudUsuario", 0.0)
         val longitudUsuario = intent.getDoubleExtra("longitudUsuario", 0.0)
@@ -133,8 +132,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 .title("Usuario: $nombreUsuario")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
         )
-
-        map.moveCamera(CameraUpdateFactory.newLatLng(ubicacionUsuario))
     }
 
     /*
